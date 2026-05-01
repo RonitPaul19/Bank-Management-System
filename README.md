@@ -1,31 +1,48 @@
 # 🏦 Bank Management System (C++)
 
-A simple **Bank Management System** built using **C++**, demonstrating core programming and OOP concepts.
+A console-based **Bank Management System** built using **C++**, demonstrating core concepts of **Object-Oriented Programming (OOP)** and basic system design.
 
 ---
 
-## ✅ Current Features
+## 🚀 Features
 
-* Create a single account
-* Deposit money
-* Withdraw money
-* Check balance
-* Menu-driven interface
+* [x] Create new bank accounts
+* [x] Menu-driven interface (CLI)
+* [x] Automatic account number generation (serial allocation)
+* [x] Deposit money
+* [x] Withdraw money with validation
+* [x] Display account details
+* [x] Multi-user support (using STL vector)
+* [x] Account search by account number
+* [x] Delete account functionality
+* [ ] File handling (persistent storage)
+* [ ] Authentication system (PIN/password)
+* [ ] Transaction history tracking
+* [ ] Money transfer between accounts
+* [ ] Admin panel (view all accounts, stats)
+* [ ] Improved UI/UX
 
 ---
 
-## 🚧 Features to be Added
+## 🛠️ Tech Stack
 
-* File handling (store data permanently)
-* Multiple account support
-* Authentication system (PIN/password)
-* Transaction history
-* Improved user interface
+* **Language:** C++
+* **Concepts Used:** Object-Oriented Programming (OOP)
+* **Libraries:** Standard Template Library (STL)
 
 ---
 
-## 🛠️ Built With
+## 📌 Project Goal
 
-* C++ (G++)
-* Object-Oriented Programming (OOP)
-* Standard Template Library (STL)
+This project aims to:
+
+* Strengthen core C++ and OOP concepts
+* Simulate a basic real-world banking system
+* Serve as a foundation for more advanced features
+
+---
+
+## 💡 Author
+
+**Ronit Paul**
+Aspiring Software Engineer | C++ Developer | DSA Enthusiast
