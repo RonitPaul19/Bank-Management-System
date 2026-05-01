@@ -1,4 +1,5 @@
-// BANK MANAGEMENT SYSTEM
+// BANK MANAGEMENT SYSTEM (Multi-User + Auto Account Number + Delete Feature)
+
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -8,25 +9,31 @@ class BankAccount {
   string accountName;
   double balance;
 
- public:
-  BankAccount(string accName, int accNo, double initialBalance)
-      : accountName(accName), accountNumber(accNo), balance(initialBalance) {}
+  static int nextAccountNumber;
 
-  // Status for deposit
+ public:
+  BankAccount(string accName, double initialBalance)
+      : accountName(accName), balance(initialBalance) {
+    accountNumber = nextAccountNumber++;
+  }
+
+  int getAccountNumber() const {
+    return accountNumber;
+  }
+
+  // Deposit status
   enum Status_for_deposit {
     D_SUCCESS,
     D_INVALID
   };
 
   Status_for_deposit deposit(double amount) {
-    if (amount <= 0) {
-      return D_INVALID;
-    }
+    if (amount <= 0) return D_INVALID;
     balance += amount;
     return D_SUCCESS;
   }
 
-  // Status for withdraw
+  // Withdraw status
   enum Status_for_withdraw {
     W_SUCCESS,
     W_INSUFFICIENT_BALANCE,
@@ -34,12 +41,8 @@ class BankAccount {
   };
 
   Status_for_withdraw withdraw(double amount) {
-    if (amount <= 0) {
-      return W_INVALID_AMOUNT;
-    }
-    if (amount > balance) {
-      return W_INSUFFICIENT_BALANCE;
-    }
+    if (amount <= 0) return W_INVALID_AMOUNT;
+    if (amount > balance) return W_INSUFFICIENT_BALANCE;
     balance -= amount;
     return W_SUCCESS;
   }
@@ -52,83 +55,171 @@ class BankAccount {
   }
 };
 
-// Create account and return object
-BankAccount createBank() {
-  char ans;
-  cout << "Do you want to create a bank account (Y/N): ";
-  cin >> ans;
+// Initialize static variable
+int BankAccount::nextAccountNumber = 1001;
 
+// Create account
+BankAccount createBank() {
   string accName;
-  int accNo;
   double initialBalance;
 
-  if (ans == 'y' || ans == 'Y') {
-    cin.ignore();  // FIX: clears buffer before getline
+  cin.ignore();
 
-    cout << "Enter account name: ";
-    getline(cin, accName);
+  cout << "Enter account name: ";
+  getline(cin, accName);
 
-    cout << "Enter account number: ";
-    cin >> accNo;
+  cout << "Enter initial balance: ";
+  cin >> initialBalance;
 
-    cout << "Enter initial balance: ";
-    cin >> initialBalance;
+  BankAccount newAcc(accName, initialBalance);
 
-    return BankAccount(accName, accNo, initialBalance);
-  }
+  cout << "\nAccount created successfully!\n";
+  cout << "Your Account Number is: " << newAcc.getAccountNumber() << endl;
 
-  return BankAccount("Default", 0, 0);
+  return newAcc;
 }
 
 int main() {
-  BankAccount user = createBank();
+  vector<BankAccount> users;
 
   int choice;
 
   while (true) {
-    cout << "\n1. Deposit\n";
-    cout << "2. Withdraw\n";
-    cout << "3. Display information\n";
+    cout << "\n====== BANK SYSTEM ======\n";
+    cout << "1. Create Account\n";
+    cout << "2. Access Account\n";
+    cout << "3. Delete Account\n";
     cout << "4. Exit\n";
-    cout << "Enter your choice: ";
+    cout << "Enter choice: ";
     cin >> choice;
 
+    // CREATE ACCOUNT
     if (choice == 1) {
-      double amount;
-      cout << "What amount do you want to deposit: ";
-      cin >> amount;
+      users.push_back(createBank());
+    }
 
-      BankAccount::Status_for_deposit result = user.deposit(amount);
+    // ACCESS ACCOUNT
+    else if (choice == 2) {
+      if (users.empty()) {
+        cout << "No accounts exist. Create one first.\n";
+        continue;
+      }
 
-      if (result == BankAccount::D_SUCCESS) {
-        cout << "Amount " << amount << " deposited successfully!\n";
+      int accNo;
+      cout << "Enter Account Number: ";
+      cin >> accNo;
+
+      int index = -1;
+
+      for (int i = 0; i < users.size(); i++) {
+        if (users[i].getAccountNumber() == accNo) {
+          index = i;
+          break;
+        }
+      }
+
+      if (index == -1) {
+        cout << "Account not found!\n";
+        continue;
+      }
+
+      int subChoice;
+
+      while (true) {
+        cout << "\n--- Account Menu ---\n";
+        cout << "1. Deposit\n";
+        cout << "2. Withdraw\n";
+        cout << "3. Display\n";
+        cout << "4. Back\n";
+        cout << "Enter choice: ";
+        cin >> subChoice;
+
+        if (subChoice == 1) {
+          double amount;
+          cout << "Enter amount to deposit: ";
+          cin >> amount;
+
+          auto result = users[index].deposit(amount);
+
+          if (result == BankAccount::D_SUCCESS)
+            cout << "Deposit successful!\n";
+          else
+            cout << "Invalid amount!\n";
+        }
+
+        else if (subChoice == 2) {
+          double amount;
+          cout << "Enter amount to withdraw: ";
+          cin >> amount;
+
+          auto result = users[index].withdraw(amount);
+
+          if (result == BankAccount::W_INVALID_AMOUNT)
+            cout << "Invalid amount!\n";
+          else if (result == BankAccount::W_INSUFFICIENT_BALANCE)
+            cout << "Insufficient balance!\n";
+          else
+            cout << "Withdrawal successful!\n";
+        }
+
+        else if (subChoice == 3) {
+          users[index].displayAccount();
+        }
+
+        else if (subChoice == 4) {
+          break;
+        }
+
+        else {
+          cout << "Invalid choice!\n";
+        }
+      }
+    }
+
+    // DELETE ACCOUNT
+    else if (choice == 3) {
+      if (users.empty()) {
+        cout << "No accounts exist.\n";
+        continue;
+      }
+
+      int accNo;
+      cout << "Enter Account Number to delete: ";
+      cin >> accNo;
+
+      int index = -1;
+
+      for (int i = 0; i < users.size(); i++) {
+        if (users[i].getAccountNumber() == accNo) {
+          index = i;
+          break;
+        }
+      }
+
+      if (index == -1) {
+        cout << "Account not found!\n";
+        continue;
+      }
+
+      char confirm;
+      cout << "Are you sure you want to delete this account? (Y/N): ";
+      cin >> confirm;
+
+      if (confirm == 'Y' || confirm == 'y') {
+        users.erase(users.begin() + index);
+        cout << "Account deleted successfully!\n";
+        cout << "Total accounts left: " << users.size() << endl;
       } else {
-        cout << "Invalid amount!\n";
+        cout << "Deletion cancelled.\n";
       }
+    }
 
-    } else if (choice == 2) {
-      double amount;
-      cout << "What amount do you want to withdraw: ";
-      cin >> amount;
-
-      BankAccount::Status_for_withdraw result = user.withdraw(amount);
-
-      if (result == BankAccount::W_INVALID_AMOUNT) {
-        cout << "Invalid amount!\n";
-      } else if (result == BankAccount::W_INSUFFICIENT_BALANCE) {
-        cout << "Insufficient bank balance!\n";
-      } else if (result == BankAccount::W_SUCCESS) {
-        cout << "Amount " << amount << " successfully withdrawn!\n";
-      }
-
-    } else if (choice == 3) {
-      user.displayAccount();
-
-    } else if (choice == 4) {
+    else if (choice == 4) {
       break;
+    }
 
-    } else {
-      cout << "Invalid choice\n";
+    else {
+      cout << "Invalid choice!\n";
     }
   }
 
