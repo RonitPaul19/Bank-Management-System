@@ -1,6 +1,80 @@
 #include <bits/stdc++.h>
 using namespace std;
 
+// ==============================================================================
+
+/*
+1) HIGHER LEVEL ARCHITECTURE -
+      +----------------------+
+      |        main()        |
+      |  (User Interface)    |
+      +----------+-----------+
+                |
+                v
+      +----------------------+
+      |     BankSystem       |
+      |  (System Manager)    |
+      +----------+-----------+
+                |
+                v
+      +----------------------+
+      |     BankAccount      |
+      | (Single Account Unit)|
+      +----------------------+
+
+2) FLOW OF EXECUTION -
+      User → main()
+          ↓
+      User enters account number
+          ↓
+      main() → bankSystem.getAccountIndex()
+          ↓
+      BankSystem searches vector
+          ↓
+      Returns index
+          ↓
+      main() → bankSystem.getAccountByIndex()
+          ↓
+      Gets reference to BankAccount
+          ↓
+      main() → account.deposit(amount)
+          ↓
+      BankAccount updates balance
+          ↓
+      Result returned to main()
+          ↓
+      main() prints success/failure
+
+3) RELATIONSHIP DIAGRAM
+      BankSystem
+        |
+        |  contains
+        v
+      vector<BankAccount>
+        |
+        |  each element is
+        v
+      BankAccount object
+
+4) CLASSES
+      <i> bankAccout
+          - accountNumber
+          - accountName
+          - balance
+          + deposit()
+          + withdraw()
+          + displayAccount()
+      <ii> bankSystem
+          + addAccount()
+          + getAccountIndex()
+          + getAccountByIndex()
+          + deleteAccount()
+          + isEmpty()
+          + totalAccounts()
+*/
+
+// ==============================================================================
+
 class BankAccount {
  private:
   int accountNumber;
@@ -27,11 +101,7 @@ class BankAccount {
   }
 
   // Withdraw status
-  enum class WithdrawStatus {
-    SUCCESS,
-    INSUFFICIENT_BALANCE,
-    INVALID_AMOUNT
-  };
+  enum class WithdrawStatus { SUCCESS, INSUFFICIENT_BALANCE, INVALID_AMOUNT };
 
   WithdrawStatus withdraw(double amount) {
     if (amount <= 0) return WithdrawStatus::INVALID_AMOUNT;
@@ -50,16 +120,13 @@ class BankAccount {
 
 int BankAccount::nextAccountNumber = 1001;
 
-
 // 🔥 BankSystem Class
 class BankSystem {
  private:
   vector<BankAccount> accounts;
 
  public:
-  void addAccount(BankAccount account) {
-    accounts.push_back(account);
-  }
+  void addAccount(BankAccount account) { accounts.push_back(account); }
 
   int getAccountIndex(int accountNumber) {
     for (int i = 0; i < accounts.size(); i++) {
@@ -70,9 +137,7 @@ class BankSystem {
     return -1;
   }
 
-  BankAccount& getAccountByIndex(int index) {
-    return accounts[index];
-  }
+  BankAccount& getAccountByIndex(int index) { return accounts[index]; }
 
   bool deleteAccount(int accountNumber) {
     int index = getAccountIndex(accountNumber);
@@ -86,7 +151,6 @@ class BankSystem {
 
   int totalAccounts() const { return accounts.size(); }
 };
-
 
 // Create Account
 BankAccount createAccount() {
@@ -106,9 +170,8 @@ BankAccount createAccount() {
   cout << "\nAccount created successfully!\n";
   cout << "Your Account Number is: " << account.getAccountNumber() << endl;
 
-  return account;
+  return account;  // returning the bank account
 }
-
 
 int main() {
   BankSystem bankSystem;
@@ -217,8 +280,7 @@ int main() {
       if (confirm == 'Y' || confirm == 'y') {
         if (bankSystem.deleteAccount(accountNumber)) {
           cout << "Account deleted successfully!\n";
-          cout << "Total accounts left: "
-               << bankSystem.totalAccounts() << endl;
+          cout << "Total accounts left: " << bankSystem.totalAccounts() << endl;
         } else {
           cout << "Account not found!\n";
         }
