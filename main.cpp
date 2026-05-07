@@ -93,7 +93,19 @@ class BankSystem {
   vector<BankAccount> accounts;
 
  public:
-  void addAccount(BankAccount account) { accounts.push_back(account); }
+  enum class CreateAccountStatus { SUCCESS, INVALID_INITIAL_BALANCE };
+
+  CreateAccountStatus createAccount(const string& name, double initialBalance,
+                                    int& createdAccountNumber) {
+    if (initialBalance < 0) {
+      return CreateAccountStatus::INVALID_INITIAL_BALANCE;
+    }
+
+    BankAccount account(name, initialBalance);
+    createdAccountNumber = account.getAccountNumber();
+    accounts.push_back(account);
+    return CreateAccountStatus::SUCCESS;
+  }
 
   int getAccountIndex(int accountNumber) {
     for (int i = 0; i < accounts.size(); i++) {
@@ -153,11 +165,17 @@ class BankUI {
     cout << "Enter initial balance: ";
     cin >> initialBalance;
 
-    BankAccount account(name, initialBalance);
-    bankSystem.addAccount(account);
+    int accountNumber;
+    auto result =
+        bankSystem.createAccount(name, initialBalance, accountNumber);
+
+    if (result == BankSystem::CreateAccountStatus::INVALID_INITIAL_BALANCE) {
+      cout << "Initial balance cannot be negative!\n";
+      return;
+    }
 
     cout << "\nAccount created successfully!\n";
-    cout << "Your Account Number is: " << account.getAccountNumber() << endl;
+    cout << "Your Account Number is: " << accountNumber << endl;
   }
 
   void accessAccount() {
