@@ -141,7 +141,6 @@ class BankUI {
     cout << "2. Access Account\n";
     cout << "3. Delete Account\n";
     cout << "4. Exit\n";
-    cout << "Enter choice: ";
   }
 
   void showAccountMenu() const {
@@ -150,20 +149,50 @@ class BankUI {
     cout << "2. Withdraw\n";
     cout << "3. Display\n";
     cout << "4. Back\n";
-    cout << "Enter choice: ";
+  }
+
+  int readInt(const string& message) {
+    int value;
+
+    while (true) {
+      cout << message;
+
+      if (cin >> value) {
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        return value;
+      }
+
+      cout << "Invalid input! Please enter a number.\n";
+      cin.clear();
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
+  }
+
+  double readDouble(const string& message) {
+    double value;
+
+    while (true) {
+      cout << message;
+
+      if (cin >> value) {
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        return value;
+      }
+
+      cout << "Invalid input! Please enter a valid amount.\n";
+      cin.clear();
+      cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    }
   }
 
   void createAccount() {
     string name;
     double initialBalance;
 
-    cin.ignore(numeric_limits<streamsize>::max(), '\n');
-
     cout << "Enter account name: ";
     getline(cin, name);
 
-    cout << "Enter initial balance: ";
-    cin >> initialBalance;
+    initialBalance = readDouble("Enter initial balance: ");
 
     int accountNumber;
     auto result =
@@ -185,8 +214,7 @@ class BankUI {
     }
 
     int accountNumber;
-    cout << "Enter Account Number: ";
-    cin >> accountNumber;
+    accountNumber = readInt("Enter Account Number: "); // to avoid entering string
 
     int index = bankSystem.getAccountIndex(accountNumber);
 
@@ -204,7 +232,7 @@ class BankUI {
 
     while (true) {
       showAccountMenu();
-      cin >> subChoice;
+      subChoice = readInt("Enter choice: ");
 
       if (subChoice == 1) {
         deposit(account);
@@ -222,8 +250,7 @@ class BankUI {
 
   void deposit(BankAccount& account) {
     double amount;
-    cout << "Enter amount to deposit: ";
-    cin >> amount;
+    amount = readDouble("Enter amount to deposit: ");
 
     auto result = account.deposit(amount);
 
@@ -235,8 +262,7 @@ class BankUI {
 
   void withdraw(BankAccount& account) {
     double amount;
-    cout << "Enter amount to withdraw: ";
-    cin >> amount;
+    amount = readDouble("Enter amount to withdraw: ");
 
     auto result = account.withdraw(amount);
 
@@ -262,8 +288,7 @@ class BankUI {
     }
 
     int accountNumber;
-    cout << "Enter Account Number to delete: ";
-    cin >> accountNumber;
+    accountNumber = readInt("Enter Account Number to delete: ");
 
     char confirm;
     cout << "Are you sure you want to delete this account? (Y/N): ";
@@ -287,7 +312,7 @@ class BankUI {
 
     while (true) {
       showMainMenu();
-      cin >> choice;
+      choice = readInt("Enter choice: ");
 
       if (choice == 1) {
         createAccount();
