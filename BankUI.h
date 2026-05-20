@@ -1,6 +1,8 @@
 #ifndef BANK_UI_H
 #define BANK_UI_H
 
+#include <cstdlib>
+#include <iomanip>
 #include <iostream>
 #include <limits>
 #include <string>
@@ -20,12 +22,35 @@ class BankUI {
     std::cout << "4. Exit\n";
   }
 
-  void showAccountMenu() const {
+  void showAccountMenu(const BankAccount& account) const {
     std::cout << "\n--- Account Menu ---\n";
+    std::cout << "Account Holder: " << account.getAccountName() << std::endl;
+    std::cout << "Account Number: " << account.getAccountNumber()
+              << std::endl;
+    showBalance("Current Balance: ", account.getBalance());
+    std::cout << "\n";
     std::cout << "1. Deposit\n";
     std::cout << "2. Withdraw\n";
     std::cout << "3. Display\n";
     std::cout << "4. Back\n";
+  }
+
+  void clearScreen() const {
+#ifdef _WIN32
+    std::system("cls");
+#else
+    std::cout << "\033[2J\033[H";
+#endif
+  }
+
+  void pauseScreen() {
+    std::cout << "\nPress Enter to continue...";
+    std::cin.get();
+  }
+
+  void showBalance(const std::string& label, double balance) const {
+    std::cout << label << std::fixed << std::setprecision(2) << balance
+              << std::endl;
   }
 
   int readInt(const std::string& message) {
@@ -86,6 +111,7 @@ class BankUI {
   void accessAccount() {
     if (bankSystem.isEmpty()) {
       std::cout << "No accounts exist. Create one first.\n";
+      pauseScreen();
       return;
     }
 
@@ -96,6 +122,7 @@ class BankUI {
 
     if (index == -1) {
       std::cout << "Account not found!\n";
+      pauseScreen();
       return;
     }
 
@@ -107,54 +134,70 @@ class BankUI {
     int subChoice;
 
     while (true) {
-      showAccountMenu();
+      clearScreen();
+      showAccountMenu(account);
       subChoice = readInt("Enter choice: ");
 
       if (subChoice == 1) {
         deposit(account);
+        pauseScreen();
       } else if (subChoice == 2) {
         withdraw(account);
+        pauseScreen();
       } else if (subChoice == 3) {
         displayAccount(account);
+        pauseScreen();
       } else if (subChoice == 4) {
         break;
       } else {
         std::cout << "Invalid choice!\n";
+        pauseScreen();
       }
     }
   }
 
   void deposit(BankAccount& account) {
     double amount;
+
+    showBalance("\nCurrent balance: ", account.getBalance());
     amount = readDouble("Enter amount to deposit: ");
 
     auto result = account.deposit(amount);
 
-    if (result == BankAccount::DepositStatus::SUCCESS)
+    if (result == BankAccount::DepositStatus::SUCCESS) {
       std::cout << "Deposit successful!\n";
-    else
+      showBalance("Updated balance: ", account.getBalance());
+    } else {
       std::cout << "Invalid amount!\n";
+      showBalance("Balance remains: ", account.getBalance());
+    }
   }
 
   void withdraw(BankAccount& account) {
     double amount;
+
+    showBalance("\nCurrent balance: ", account.getBalance());
     amount = readDouble("Enter amount to withdraw: ");
 
     auto result = account.withdraw(amount);
 
-    if (result == BankAccount::WithdrawStatus::INVALID_AMOUNT)
+    if (result == BankAccount::WithdrawStatus::INVALID_AMOUNT) {
       std::cout << "Invalid amount!\n";
-    else if (result == BankAccount::WithdrawStatus::INSUFFICIENT_BALANCE)
+      showBalance("Balance remains: ", account.getBalance());
+    } else if (result == BankAccount::WithdrawStatus::INSUFFICIENT_BALANCE) {
       std::cout << "Insufficient balance!\n";
-    else
+      showBalance("Available balance: ", account.getBalance());
+    } else {
       std::cout << "Withdrawal successful!\n";
+      showBalance("Updated balance: ", account.getBalance());
+    }
   }
 
   void displayAccount(const BankAccount& account) const {
     std::cout << "\n--- Account Details ---\n";
     std::cout << "Account Name: " << account.getAccountName() << std::endl;
     std::cout << "Account Number: " << account.getAccountNumber() << std::endl;
-    std::cout << "Balance: " << account.getBalance() << std::endl;
+    showBalance("Balance: ", account.getBalance());
   }
 
   void deleteAccount() {
@@ -169,6 +212,7 @@ class BankUI {
     char confirm;
     std::cout << "Are you sure you want to delete this account? (Y/N): ";
     std::cin >> confirm;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
     if (confirm == 'Y' || confirm == 'y') {
       if (bankSystem.deleteAccount(accountNumber)) {
@@ -188,19 +232,23 @@ class BankUI {
     int choice;
 
     while (true) {
+      clearScreen();
       showMainMenu();
       choice = readInt("Enter choice: ");
 
       if (choice == 1) {
         createAccount();
+        pauseScreen();
       } else if (choice == 2) {
         accessAccount();
       } else if (choice == 3) {
         deleteAccount();
+        pauseScreen();
       } else if (choice == 4) {
         break;
       } else {
         std::cout << "Invalid choice!\n";
+        pauseScreen();
       }
     }
   }
