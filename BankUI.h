@@ -25,8 +25,7 @@ class BankUI {
   void showAccountMenu(const BankAccount& account) const {
     std::cout << "\n--- Account Menu ---\n";
     std::cout << "Account Holder: " << account.getAccountName() << std::endl;
-    std::cout << "Account Number: " << account.getAccountNumber()
-              << std::endl;
+    std::cout << "Account Number: " << account.getAccountNumber() << std::endl;
     showBalance("Current Balance: ", account.getBalance());
     std::cout << "\n";
     std::cout << "1. Deposit\n";
@@ -165,7 +164,10 @@ class BankUI {
     auto result = account.deposit(amount);
 
     if (result == BankAccount::DepositStatus::SUCCESS) {
+      bankSystem.saveToFile();
+
       std::cout << "Deposit successful!\n";
+
       showBalance("Updated balance: ", account.getBalance());
     } else {
       std::cout << "Invalid amount!\n";
@@ -188,6 +190,7 @@ class BankUI {
       std::cout << "Insufficient balance!\n";
       showBalance("Available balance: ", account.getBalance());
     } else {
+      bankSystem.saveToFile();
       std::cout << "Withdrawal successful!\n";
       showBalance("Updated balance: ", account.getBalance());
     }
