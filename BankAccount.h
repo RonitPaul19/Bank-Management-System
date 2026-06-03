@@ -8,6 +8,7 @@ class BankAccount {
   int accountNumber;
   std::string accountName;
   double balance;
+  std::string pin;
 
   inline static int nextAccountNumber = 1001;
 
@@ -16,24 +17,32 @@ class BankAccount {
   enum class WithdrawStatus { SUCCESS, INSUFFICIENT_BALANCE, INVALID_AMOUNT };
 
   // Normal constructor
-  BankAccount(std::string name, double initialBalance)
-      : accountName(name), balance(initialBalance) {
+  BankAccount(std::string name, double initialBalance, std::string accountPin)
+      : accountName(name), balance(initialBalance), pin(accountPin) {
     accountNumber = nextAccountNumber++;
   }
 
   // Constructor for loading from file
   BankAccount(int accNumber,
               std::string name,
-              double initialBalance)
+              double initialBalance,
+              std::string accountPin)
       : accountNumber(accNumber),
         accountName(name),
-        balance(initialBalance) {}
+        balance(initialBalance),
+        pin(accountPin) {}
 
   int getAccountNumber() const { return accountNumber; }
 
   std::string getAccountName() const { return accountName; }
 
   double getBalance() const { return balance; }
+
+  std::string getPin() const { return pin; }
+
+  bool verifyPin(const std::string& enteredPin) const {
+    return pin == enteredPin;
+  }
 
   DepositStatus deposit(double amount) {
     if (amount <= 0) return DepositStatus::INVALID_AMOUNT;

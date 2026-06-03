@@ -15,8 +15,8 @@ A console-based **Bank Management System** built using **C++**, demonstrating co
 * [x] Multi-user support (using STL vector)
 * [x] Account search by account number
 * [x] Delete account functionality
-* [ ] File handling (persistent storage)
-* [ ] Authentication system (PIN/password)
+* [x] File handling (persistent storage)
+* [x] Authentication system (PIN/password)
 * [ ] Transaction history tracking
 * [ ] Money transfer between accounts
 * [ ] Admin panel (view all accounts, stats)

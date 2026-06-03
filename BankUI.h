@@ -1,6 +1,7 @@
 #ifndef BANK_UI_H
 #define BANK_UI_H
 
+#include <cctype>
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
@@ -86,20 +87,68 @@ class BankUI {
     }
   }
 
+  bool isValidPin(const std::string& pin) const {
+    if (pin.length() != 4) {
+      return false;
+    }
+
+    for (char digit : pin) {
+      if (!std::isdigit(static_cast<unsigned char>(digit))) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  std::string readPin(const std::string& message) {
+    std::string pin;
+
+    while (true) {
+      std::cout << message;
+      std::getline(std::cin, pin);
+
+      if (isValidPin(pin)) {
+        return pin;
+      }
+
+      std::cout << "PIN must be exactly 4 digits.\n";
+    }
+  }
+
+  bool authenticateAccount(const BankAccount& account) {
+    std::string pin = readPin("Enter account PIN: ");
+
+    if (!account.verifyPin(pin)) {
+      std::cout << "Incorrect PIN!\n";
+      return false;
+    }
+
+    return true;
+  }
+
   void createAccount() {
     std::string name;
     double initialBalance;
+    std::string pin;
 
     std::cout << "Enter account name: ";
     std::getline(std::cin, name);
 
     initialBalance = readDouble("Enter initial balance: ");
+    pin = readPin("Create a 4-digit PIN: ");
 
     int accountNumber;
-    auto result = bankSystem.createAccount(name, initialBalance, accountNumber);
+    auto result =
+        bankSystem.createAccount(name, initialBalance, pin, accountNumber);
 
     if (result == BankSystem::CreateAccountStatus::INVALID_INITIAL_BALANCE) {
       std::cout << "Initial balance cannot be negative!\n";
+      return;
+    }
+
+    if (result == BankSystem::CreateAccountStatus::INVALID_PIN) {
+      std::cout << "Invalid PIN!\n";
       return;
     }
 
@@ -126,6 +175,12 @@ class BankUI {
     }
 
     BankAccount& account = bankSystem.getAccountByIndex(index);
+
+    if (!authenticateAccount(account)) {
+      pauseScreen();
+      return;
+    }
+
     handleAccountMenu(account);
   }
 
@@ -211,6 +266,19 @@ class BankUI {
 
     int accountNumber;
     accountNumber = readInt("Enter Account Number to delete: ");
+
+    int index = bankSystem.getAccountIndex(accountNumber);
+
+    if (index == -1) {
+      std::cout << "Account not found!\n";
+      return;
+    }
+
+    BankAccount& account = bankSystem.getAccountByIndex(index);
+
+    if (!authenticateAccount(account)) {
+      return;
+    }
 
     char confirm;
     std::cout << "Are you sure you want to delete this account? (Y/N): ";

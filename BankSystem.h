@@ -1,8 +1,10 @@
 #ifndef BANK_SYSTEM_H
 #define BANK_SYSTEM_H
 
+#include <cctype>
 #include <cstddef>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -12,10 +14,25 @@ class BankSystem {
  private:
   std::vector<BankAccount> accounts;
 
+  static bool isValidPin(const std::string& pin) {
+    if (pin.length() != 4) {
+      return false;
+    }
+
+    for (char digit : pin) {
+      if (!std::isdigit(static_cast<unsigned char>(digit))) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
  public:
   enum class CreateAccountStatus {
     SUCCESS,
-    INVALID_INITIAL_BALANCE
+    INVALID_INITIAL_BALANCE,
+    INVALID_PIN
   };
 
   // Constructor
@@ -29,7 +46,8 @@ class BankSystem {
     for (const auto& account : accounts) {
       file << account.getAccountNumber() << " "
            << account.getAccountName() << " "
-           << account.getBalance() << "\n";
+           << account.getBalance() << " "
+           << account.getPin() << "\n";
     }
 
     file.close();
@@ -38,14 +56,27 @@ class BankSystem {
   void loadFromFile() {
     std::ifstream file("accounts.txt");
 
-    int accNumber;
-    std::string name;
-    double balance;
+    std::string line;
 
     int highestAccountNumber = 1000;
 
-    while (file >> accNumber >> name >> balance) {
-      BankAccount account(accNumber, name, balance);
+    while (std::getline(file, line)) {
+      std::istringstream lineStream(line);
+
+      int accNumber;
+      std::string name;
+      double balance;
+      std::string pin;
+
+      if (!(lineStream >> accNumber >> name >> balance)) {
+        continue;
+      }
+
+      if (!(lineStream >> pin) || !isValidPin(pin)) {
+        pin = "0000";
+      }
+
+      BankAccount account(accNumber, name, balance, pin);
 
       accounts.push_back(account);
 
@@ -61,12 +92,17 @@ class BankSystem {
 
   CreateAccountStatus createAccount(const std::string& name,
                                     double initialBalance,
+                                    const std::string& pin,
                                     int& createdAccountNumber) {
     if (initialBalance < 0) {
       return CreateAccountStatus::INVALID_INITIAL_BALANCE;
     }
 
-    BankAccount account(name, initialBalance);
+    if (!isValidPin(pin)) {
+      return CreateAccountStatus::INVALID_PIN;
+    }
+
+    BankAccount account(name, initialBalance, pin);
 
     createdAccountNumber = account.getAccountNumber();
 
